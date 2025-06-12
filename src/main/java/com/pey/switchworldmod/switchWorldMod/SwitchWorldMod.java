@@ -86,7 +86,6 @@ public class SwitchWorldMod implements ModInitializer {
 
         try {
             NbtIo.writeCompressed(nbt, file.toPath());
-            System.out.println("[SwitchWorldMod] Saved player data to: " + file.getAbsolutePath());
         } catch (IOException e) {
             System.err.println("[SwitchWorldMod] Error saving player data: " + e.getMessage());
             e.printStackTrace();
@@ -111,7 +110,6 @@ public class SwitchWorldMod implements ModInitializer {
             try {
                 NbtCompound nbt = NbtIo.readCompressed(file.toPath(), NbtSizeTracker.ofUnlimitedBytes());
                 player.readNbt(nbt);
-                System.out.println("[SwitchWorldMod] Loaded player data from: " + file.getAbsolutePath());
 
                 // Restaurar posición si está en el NBT
                 if (nbt.contains("Pos")) {
