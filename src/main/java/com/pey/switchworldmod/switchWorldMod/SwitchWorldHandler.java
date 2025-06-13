@@ -7,6 +7,8 @@ import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.OperatorEntry;
+import net.minecraft.server.OperatorList;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -20,24 +22,29 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import static com.pey.switchworldmod.switchWorldMod.Constants.*;
+
 public class SwitchWorldHandler {
 
-    public static final String MOD_ID = "switch-world-mod";
     public static final RegistryKey<World> TEST_WORLD =
-            RegistryKey.of(RegistryKeys.WORLD, Identifier.of(MOD_ID, "testworld"));
+            RegistryKey.of(RegistryKeys.WORLD, Identifier.of(MOD_ID, TEST_WORLD_NAME));
 
     public static int switchWorld(ServerCommandSource source) {
         ServerPlayerEntity player = source.getPlayer();
+        if (player == null) {
+            source.sendError(Text.literal("This command can only be executed by a player"));
+            return 0;
+        }
+
         MinecraftServer server = source.getServer();
-
-        assert player != null;
-
         RegistryKey<World> currentKey = player.getWorld().getRegistryKey();
         RegistryKey<World> targetKey;
 
         if (currentKey.equals(TEST_WORLD)) {
             RegistryKey<World> previousKey = readPreviousWorldKey(player, server);
-            targetKey = previousKey != null ? previousKey : World.OVERWORLD;
+            targetKey = previousKey != null
+                    ? previousKey
+                    : World.OVERWORLD;
         } else {
             targetKey = TEST_WORLD;
         }
@@ -54,7 +61,17 @@ public class SwitchWorldHandler {
 
         player.teleport(targetWorld, player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
 
-        player.changeGameMode(targetKey.equals(TEST_WORLD) ? GameMode.CREATIVE : GameMode.SURVIVAL);
+        OperatorList opList = server.getPlayerManager().getOpList();
+        if (targetKey.equals(TEST_WORLD)) {
+            player.changeGameMode(GameMode.CREATIVE);
+            opList.add(new OperatorEntry(player.getGameProfile(), 2, false)); // para permitir world edit
+        } else {
+            player.changeGameMode(GameMode.SURVIVAL);
+            opList.remove(player.getGameProfile());
+        }
+
+        // forzar actualización de árbol de comandos
+        server.getCommandManager().sendCommandTree(player);
 
         source.sendFeedback(() -> Text.literal(String.format("Teleported to %s", targetKey.getValue())), false);
 
@@ -66,13 +83,13 @@ public class SwitchWorldHandler {
         player.writeNbt(nbt);
 
         if (!key.equals(TEST_WORLD)) {
-            nbt.putString("SwitchWorldMod_PreviousDimension", key.getValue().toString());
+            nbt.putString(PLAYERDATA_PREVIOUS_DIMENSION_ENTRY, key.getValue().toString());
         }
 
         File file;
         if (key.equals(TEST_WORLD)) {
             // Guardar en testworldplayerdata
-            File dir = new File(server.getSavePath(WorldSavePath.ROOT).toFile(), "playerdata/testworld");
+            File dir = new File(server.getSavePath(WorldSavePath.ROOT).toFile(), TESTWORLD_PLAYERDATA_DIRECTORY);
             if (!dir.exists()) dir.mkdirs();
             file = new File(dir, String.format("%s.dat", player.getUuidAsString()));
         } else if (key.equals(World.OVERWORLD)
@@ -86,7 +103,7 @@ public class SwitchWorldHandler {
         try {
             NbtIo.writeCompressed(nbt, file.toPath());
         } catch (IOException e) {
-            System.err.printf("[SwitchWorldMod] Error saving player data: %s%n", e.getMessage());
+            System.err.printf("[%s] Error saving player data: %s%n", MOD_NAME, e.getMessage());
             e.printStackTrace();
         }
     }
@@ -98,7 +115,7 @@ public class SwitchWorldHandler {
 
         File file;
         if (key.equals(TEST_WORLD)) {
-            file = new File(server.getSavePath(WorldSavePath.ROOT).toFile(), String.format("playerdata/testworld/%s.dat", player.getUuidAsString()));
+            file = new File(server.getSavePath(WorldSavePath.ROOT).toFile(), String.format("%s/%s.dat", TESTWORLD_PLAYERDATA_DIRECTORY, player.getUuidAsString()));
         } else if (key.equals(World.OVERWORLD)
                 || key.equals(World.NETHER)
                 || key.equals(World.END)) {
@@ -127,11 +144,11 @@ public class SwitchWorldHandler {
                     }
                 }
             } catch (IOException e) {
-                System.err.printf("[SwitchWorldMod] Failed to load player data: %s%n", e.getMessage());
+                System.err.printf("[%s] Failed to load player data: %s%n", MOD_NAME, e.getMessage());
                 e.printStackTrace();
             }
         } else {
-            System.out.printf("[SwitchWorldMod] No previous data found for: %s%n", file.getAbsolutePath());
+            System.out.printf("[%s] No previous data found for: %s%n", MOD_NAME, file.getAbsolutePath());
         }
 
         player.teleport(
@@ -150,12 +167,12 @@ public class SwitchWorldHandler {
         if (file.exists()) {
             try {
                 NbtCompound nbt = NbtIo.readCompressed(file.toPath(), NbtSizeTracker.ofUnlimitedBytes());
-                if (nbt.contains("SwitchWorldMod_PreviousDimension")) {
-                    String id = nbt.getString("SwitchWorldMod_PreviousDimension");
+                if (nbt.contains(PLAYERDATA_PREVIOUS_DIMENSION_ENTRY)) {
+                    String id = nbt.getString(PLAYERDATA_PREVIOUS_DIMENSION_ENTRY);
                     return RegistryKey.of(RegistryKeys.WORLD, Identifier.of(id));
                 }
             } catch (IOException e) {
-                System.err.printf("[SwitchWorldMod] Could not read previous world key: %s%n", e.getMessage());
+                System.err.printf("[%s] Could not read previous world key: %s%n", MOD_NAME, e.getMessage());
             }
         }
 

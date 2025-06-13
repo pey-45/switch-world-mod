@@ -4,6 +4,7 @@
     "package": "com.pey.switchworldmod.switchWorldMod.mixin",
     "compatibilityLevel": "JAVA_21",
     "mixins": [
+        "CommandManagerMixin"
     ],
     "injectors": {
         "defaultRequire": 1

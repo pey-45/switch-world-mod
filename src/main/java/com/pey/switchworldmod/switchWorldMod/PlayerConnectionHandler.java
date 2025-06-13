@@ -7,8 +7,9 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 
-public class DisconnectHandler {
-    public static void onDisconnect(ServerPlayNetworkHandler handler, MinecraftServer server) {
+public class PlayerConnectionHandler {
+
+   public static void onTriggerConnection(ServerPlayNetworkHandler handler, MinecraftServer server) {
         ServerPlayerEntity player = handler.player;
         RegistryKey<World> currentKey = player.getWorld().getRegistryKey();
 
@@ -16,11 +17,17 @@ public class DisconnectHandler {
             SwitchWorldHandler.savePlayerData(player, server, currentKey);
 
             RegistryKey<World> previousKey = SwitchWorldHandler.readPreviousWorldKey(player, server);
-            if (previousKey != null) {
+            if (previousKey != null && !previousKey.equals(currentKey)) {
                 SwitchWorldHandler.loadPlayerData(player, server, previousKey);
             }
-
-            player.changeGameMode(GameMode.SURVIVAL);
         }
-    }
+
+       if (!player.interactionManager.getGameMode().equals(GameMode.SURVIVAL)) {
+           player.changeGameMode(GameMode.SURVIVAL);
+       }
+       if (server.getPlayerManager().isOperator(player.getGameProfile())) {
+           server.getPlayerManager().getOpList().remove(player.getGameProfile());
+       }
+
+   }
 }
