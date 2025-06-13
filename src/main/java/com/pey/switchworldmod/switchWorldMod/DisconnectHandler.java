@@ -4,6 +4,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 
 public class DisconnectHandler {
@@ -18,6 +19,8 @@ public class DisconnectHandler {
             if (previousKey != null) {
                 SwitchWorldHandler.loadPlayerData(player, server, previousKey);
             }
+
+            player.changeGameMode(GameMode.SURVIVAL);
         }
     }
 }
