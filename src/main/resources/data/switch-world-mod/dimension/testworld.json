@@ -1,5 +1,5 @@
 {
-    "type": "switch-world-mod:test_world_type",
+    "type": "switch-world-mod:testworld_type",
     "generator": {
         "type": "minecraft:flat",
         "settings": {

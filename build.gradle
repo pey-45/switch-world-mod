@@ -4,10 +4,13 @@ plugins {
 }
 
 version = project.mod_version
+archives_base_name = project.archives_base_name
+minecraft_version = project.minecraft_version
+loader_version = project.loader_version
 group = project.maven_group
 
 base {
-    archivesName = project.archives_base_name
+    archivesName = "${project.archives_base_name}-fabric-${minecraft_version}-${loader_version}"
 }
 
 loom {
