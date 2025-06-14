@@ -2,9 +2,8 @@ package com.pey.switchworldmod.switchWorldMod;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 
-public class SwitchWorldMod implements ModInitializer {
+public class SwitchWorld implements ModInitializer {
 
     @Override
     public void onInitialize() {

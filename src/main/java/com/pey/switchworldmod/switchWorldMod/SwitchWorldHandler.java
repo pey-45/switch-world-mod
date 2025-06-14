@@ -7,22 +7,19 @@ import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.OperatorEntry;
-import net.minecraft.server.OperatorList;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.WorldSavePath;
-import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import static com.pey.switchworldmod.switchWorldMod.Constants.*;
+import static com.pey.switchworldmod.switchWorldMod.util.Constants.*;
 
 public class SwitchWorldHandler {
 
@@ -55,13 +52,10 @@ public class SwitchWorldHandler {
             return 0;
         }
 
-        savePlayerData(player, server, currentKey);
-
-        loadPlayerData(player, server, targetKey);
-
         player.teleport(targetWorld, player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
 
-        source.sendFeedback(() -> Text.literal(String.format("Teleported to %s", targetKey.getValue())), false);
+        String destName = targetKey.getValue().toString().replace("minecraft:", "").replace(String.format("%s:", MOD_ID), "");
+        source.sendFeedback(() -> Text.literal(String.format("Teleported to %s", destName)), false);
 
         return 1;
     }
@@ -70,9 +64,7 @@ public class SwitchWorldHandler {
         NbtCompound nbt = new NbtCompound();
         player.writeNbt(nbt);
 
-        if (!key.equals(TEST_WORLD)) {
-            nbt.putString(PLAYERDATA_PREVIOUS_DIMENSION_ENTRY, key.getValue().toString());
-        }
+        nbt.putString(PLAYERDATA_PREVIOUS_DIMENSION_ENTRY, key.getValue().toString());
 
         File file;
         if (key.equals(TEST_WORLD)) {

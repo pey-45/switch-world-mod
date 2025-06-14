@@ -3,7 +3,7 @@ package com.pey.switchworldmod.switchWorldMod;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.server.command.ServerCommandSource;
 
-import static com.pey.switchworldmod.switchWorldMod.Constants.SWITCH_WORLD_COMMAND;
+import static com.pey.switchworldmod.switchWorldMod.util.Constants.SWITCH_WORLD_COMMAND;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class SwitchWorldCommand {

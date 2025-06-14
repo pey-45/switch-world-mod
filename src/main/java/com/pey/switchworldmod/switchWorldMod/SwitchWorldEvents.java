@@ -1,11 +1,8 @@
 package com.pey.switchworldmod.switchWorldMod;
 
-import com.sk89q.worldedit.entity.Player;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.OperatorEntry;
-import net.minecraft.server.OperatorList;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
@@ -34,6 +31,12 @@ public class SwitchWorldEvents {
     private static void onWorldChange(ServerPlayerEntity player, RegistryKey<World> from, RegistryKey<World> to) {
         MinecraftServer server = player.getServer();
         if (server == null) return;
+
+        if (from != null) {
+            SwitchWorldHandler.savePlayerData(player, server, from);
+        }
+
+        SwitchWorldHandler.loadPlayerData(player, server, to);
 
         if (to.equals(SwitchWorldHandler.TEST_WORLD)) {
             player.changeGameMode(GameMode.CREATIVE);
