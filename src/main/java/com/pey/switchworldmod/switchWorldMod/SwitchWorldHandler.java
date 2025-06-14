@@ -61,18 +61,6 @@ public class SwitchWorldHandler {
 
         player.teleport(targetWorld, player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
 
-        OperatorList opList = server.getPlayerManager().getOpList();
-        if (targetKey.equals(TEST_WORLD)) {
-            player.changeGameMode(GameMode.CREATIVE);
-            opList.add(new OperatorEntry(player.getGameProfile(), 2, false)); // para permitir world edit
-        } else {
-            player.changeGameMode(GameMode.SURVIVAL);
-            opList.remove(player.getGameProfile());
-        }
-
-        // forzar actualización de árbol de comandos
-        server.getCommandManager().sendCommandTree(player);
-
         source.sendFeedback(() -> Text.literal(String.format("Teleported to %s", targetKey.getValue())), false);
 
         return 1;
@@ -160,7 +148,7 @@ public class SwitchWorldHandler {
         );
     }
 
-    public static RegistryKey<World> readPreviousWorldKey(ServerPlayerEntity player, MinecraftServer server) {
+    private static RegistryKey<World> readPreviousWorldKey(ServerPlayerEntity player, MinecraftServer server) {
         File file = new File(server.getSavePath(WorldSavePath.PLAYERDATA).toFile(),
                 String.format("%s.dat", player.getUuidAsString()));
 
@@ -178,5 +166,4 @@ public class SwitchWorldHandler {
 
         return null;
     }
-
 }

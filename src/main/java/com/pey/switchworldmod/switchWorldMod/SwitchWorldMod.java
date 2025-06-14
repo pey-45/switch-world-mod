@@ -9,8 +9,7 @@ public class SwitchWorldMod implements ModInitializer {
     @Override
     public void onInitialize() {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> SwitchWorldCommand.register(dispatcher));
-        ServerPlayConnectionEvents.INIT.register(PlayerConnectionHandler::onTriggerConnection);
-        ServerPlayConnectionEvents.DISCONNECT.register(PlayerConnectionHandler::onTriggerConnection);
+        SwitchWorldEvents.register();
     }
 
 }
