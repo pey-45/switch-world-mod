@@ -14,7 +14,7 @@
             "com.pey.switchworldmod.switchWorldMod.client.SwitchWorldModDataGenerator"
         ],
         "main": [
-            "com.pey.switchworldmod.switchWorldMod.SwitchWorld"
+            "com.pey.switchworldmod.switchWorldMod.SwitchWorldMod"
         ]
     },
     "mixins": [

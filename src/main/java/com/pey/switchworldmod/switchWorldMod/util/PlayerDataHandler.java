@@ -1,4 +1,4 @@
-package com.pey.switchworldmod.switchWorldMod;
+package com.pey.switchworldmod.switchWorldMod.util;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtDouble;
@@ -7,10 +7,8 @@ import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.world.World;
@@ -19,46 +17,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import static com.pey.switchworldmod.switchWorldMod.util.Constants.*;
+import static com.pey.switchworldmod.switchWorldMod.util.Constants.MOD_NAME;
+import static com.pey.switchworldmod.switchWorldMod.util.Constants.PLAYERDATA_PREVIOUS_DIMENSION_ENTRY;
+import static com.pey.switchworldmod.switchWorldMod.util.Constants.TESTWORLD_PLAYERDATA_DIRECTORY;
+import static com.pey.switchworldmod.switchWorldMod.util.Constants.TEST_WORLD;
 
-public class SwitchWorldHandler {
-
-    public static final RegistryKey<World> TEST_WORLD =
-            RegistryKey.of(RegistryKeys.WORLD, Identifier.of(MOD_ID, TEST_WORLD_NAME));
-
-    public static int switchWorld(ServerCommandSource source) {
-        ServerPlayerEntity player = source.getPlayer();
-        if (player == null) {
-            source.sendError(Text.literal("This command can only be executed by a player"));
-            return 0;
-        }
-
-        MinecraftServer server = source.getServer();
-        RegistryKey<World> currentKey = player.getWorld().getRegistryKey();
-        RegistryKey<World> targetKey;
-
-        if (currentKey.equals(TEST_WORLD)) {
-            RegistryKey<World> previousKey = readPreviousWorldKey(player, server);
-            targetKey = previousKey != null
-                    ? previousKey
-                    : World.OVERWORLD;
-        } else {
-            targetKey = TEST_WORLD;
-        }
-
-        ServerWorld targetWorld = server.getWorld(targetKey);
-        if (targetWorld == null) {
-            source.sendError(Text.literal("Destination not found"));
-            return 0;
-        }
-
-        player.teleport(targetWorld, player.getX(), player.getY(), player.getZ(), player.getYaw(), player.getPitch());
-
-        String destName = targetKey.getValue().toString().replace("minecraft:", "").replace(String.format("%s:", MOD_ID), "");
-        source.sendFeedback(() -> Text.literal(String.format("Teleported to %s", destName)), false);
-
-        return 1;
-    }
+public class PlayerDataHandler {
 
     public static void savePlayerData(ServerPlayerEntity player, MinecraftServer server, RegistryKey<World> key) {
         NbtCompound nbt = new NbtCompound();
@@ -131,16 +95,9 @@ public class SwitchWorldHandler {
             System.out.printf("[%s] No previous data found for: %s%n", MOD_NAME, file.getAbsolutePath());
         }
 
-        player.teleport(
-                world,
-                world.getSpawnPos().getX() + 0.5,
-                world.getSpawnPos().getY() + 1,
-                world.getSpawnPos().getZ() + 0.5,
-                player.getYaw(), player.getPitch()
-        );
     }
 
-    private static RegistryKey<World> readPreviousWorldKey(ServerPlayerEntity player, MinecraftServer server) {
+    public static RegistryKey<World> readPreviousWorldKey(ServerPlayerEntity player, MinecraftServer server) {
         File file = new File(server.getSavePath(WorldSavePath.PLAYERDATA).toFile(),
                 String.format("%s.dat", player.getUuidAsString()));
 
@@ -158,4 +115,5 @@ public class SwitchWorldHandler {
 
         return null;
     }
+
 }

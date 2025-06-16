@@ -1,6 +1,6 @@
 package com.pey.switchworldmod.switchWorldMod.mixin;
 
-import com.pey.switchworldmod.switchWorldMod.SwitchWorldHandler;
+import com.pey.switchworldmod.switchWorldMod.util.PlayerDataHandler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -9,15 +9,22 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(PlayerManager.class)
-public class PlayerManagerMixin {
+import static com.pey.switchworldmod.switchWorldMod.util.Constants.TEST_WORLD;
 
+@Mixin(PlayerManager.class)
+public class DisconnectHandler {
+
+    // intercepts minecraft's automatic playerdata save method for a player
     @Inject(method = "savePlayerData", at = @At("HEAD"), cancellable = true)
     private void onSavePlayerData(ServerPlayerEntity player, CallbackInfo ci) {
-        if (player.getWorld().getRegistryKey().equals(SwitchWorldHandler.TEST_WORLD)) {
+        // if player in the test world
+        if (player.getWorld().getRegistryKey().equals(TEST_WORLD)) {
             MinecraftServer server = player.getServer();
-            SwitchWorldHandler.savePlayerData(player, server, SwitchWorldHandler.TEST_WORLD);
+            // saves the data in the test world's playerdata directory
+            PlayerDataHandler.savePlayerData(player, server, TEST_WORLD);
+            // cancels minecraft's automatic playerdata save method
             ci.cancel();
         }
     }
+
 }

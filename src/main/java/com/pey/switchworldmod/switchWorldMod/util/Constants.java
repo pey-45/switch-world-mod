@@ -1,8 +1,11 @@
 package com.pey.switchworldmod.switchWorldMod.util;
 
-public class Constants {
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.util.Identifier;
+import net.minecraft.world.World;
 
-    public static final String SWITCH_WORLD_COMMAND = "switchworld";
+public class Constants {
 
     public static final String TEST_WORLD_NAME = "testworld";
 
@@ -13,5 +16,8 @@ public class Constants {
     public static final String MOD_NAME = "SwitchWorld";
 
     public static final String TESTWORLD_PLAYERDATA_DIRECTORY = String.format("dimensions/%s/%s/playerdata", MOD_ID, TEST_WORLD_NAME);
+
+    public static final RegistryKey<World> TEST_WORLD =
+            RegistryKey.of(RegistryKeys.WORLD, Identifier.of(MOD_ID, TEST_WORLD_NAME));
 
 }
